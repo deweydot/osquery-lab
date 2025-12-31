@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Osquery Lab</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Osquery Lab Server</h1>
+
+    <div class="controls">
+        <textarea id="sql" placeholder="SELECT * FROM processes WHERE on_disk = 0;"></textarea>
+        <br>
+        <button onclick="deploy()">RUN QUERY</button>
+        <span id="status" style="color: #888; font-style: italic; margin-left: 10px;"></span>
+    </div>
+
+    <div id="table-container"></div>
+
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>
