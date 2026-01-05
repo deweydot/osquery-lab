@@ -12,6 +12,11 @@ provider "google" {
     zone    = var.zone
 }
 
+module "server" {
+    source = "../modules/server"
+    location = var.region
+}
+
 resource "google_compute_instance" "vm" {
     name         = "lab1-instance"
     machine_type = "e2-micro"
@@ -28,6 +33,6 @@ resource "google_compute_instance" "vm" {
     }
 
     metadata_startup_script = templatefile("${path.module}/startup.sh", {
-        server_url = var.server_url
+        server_hostname = trimprefix(module.server.server_url, "https://")
     })
 }
