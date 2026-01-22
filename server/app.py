@@ -1,5 +1,6 @@
 import uuid
 from flask import Flask, request, jsonify, render_template
+import os
 
 app = Flask(__name__)
 
@@ -8,6 +9,7 @@ HOSTNAMES = {} # map node key to hostname
 QUERY = {"id": None, "sql": None} # current query
 RESULTS = {} # results from current query
 PROCESSED_NODES = set() # nodes that already been sent query
+ENROLL_SECRET = os.getenv("ENROLL_SECRET")
 
 @app.route('/')
 def index(): return render_template('index.html')
@@ -43,6 +45,7 @@ def enroll():
     """
     Endpoint for enrollment of new nodes
     """
+    if request.json.get('enroll_secret') != ENROLL_SECRET: return jsonify(node_invalid=True) # validate enroll secret
     if not request.json.get('host_identifier'): return jsonify(node_invalid=True) # require hostname for enrollment
 
     node_key = str(uuid.uuid4()) # generate unique node key

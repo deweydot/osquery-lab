@@ -1,11 +1,10 @@
 #!/bin/bash
 
 # install osquery
-wget -q "https://pkg.osquery.io/deb/osquery_5.20.0-1.linux_amd64.deb" -O /tmp/osquery.deb
-dpkg -i /tmp/osquery.deb
-
-# create enroll secret
-echo "lab-secret" > /etc/osquery/enroll.secret
+wget -O /etc/apt/keyrings/osquery.asc https://pkg.osquery.io/deb/pubkey.gpg
+echo 'deb [arch=amd64 signed-by=/etc/apt/keyrings/osquery.asc] https://pkg.osquery.io/deb deb main' > /etc/apt/sources.list.d/osquery.list
+apt update
+apt install osquery -y
 
 # configure osquery
 cat <<EOF > /etc/osquery/osquery.flags
@@ -26,6 +25,9 @@ cat <<EOF > /etc/osquery/osquery.flags
 --disable_distributed=false
 --distributed_interval=5
 EOF
+
+# write enroll secret
+echo '${enroll_secret}' > /etc/osquery/enroll.secret
 
 # start osqueryd
 systemctl enable osqueryd

@@ -1,11 +1,3 @@
-terraform {
-    required_providers {
-        google = {
-            source = "hashicorp/google"
-        }
-    }
-}
-
 provider "google" {
     project = var.project_id
     region  = var.region
@@ -17,7 +9,7 @@ module "server" {
     location = var.region
 }
 
-resource "google_compute_instance" "vm" {
+resource "google_compute_instance" "node1" {
     name         = "lab1-instance"
     machine_type = "e2-micro"
 
@@ -34,5 +26,6 @@ resource "google_compute_instance" "vm" {
 
     metadata_startup_script = templatefile("${path.module}/startup.sh", {
         server_hostname = trimprefix(module.server.server_url, "https://")
+        enroll_secret = module.server.enroll_secret
     })
 }

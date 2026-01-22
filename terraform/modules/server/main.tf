@@ -13,7 +13,16 @@ resource "google_cloud_run_v2_service" "service" {
         containers {
             image = "fmi"
         }
+        env {
+            name = "ENROLL_SECRET"
+            value = random_password.enroll_secret.result
+      }
     }
+}
+
+resource "random_password" "enroll_secret" {
+    length  = 32
+    special = false
 }
 
 resource "google_cloud_run_v2_service_iam_member" "noauth" {
