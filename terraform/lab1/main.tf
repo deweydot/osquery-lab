@@ -7,6 +7,7 @@ provider "google" {
 module "server" {
     source = "../modules/server"
     location = var.region
+    image = var.server_image
 }
 
 resource "google_compute_instance" "node1" {

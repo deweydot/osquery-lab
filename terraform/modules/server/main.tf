@@ -11,12 +11,13 @@ resource "google_cloud_run_v2_service" "service" {
 
     template {
         containers {
-            image = "fmi"
+            image = var.image
+            
+            env {
+                name = "ENROLL_SECRET"
+                value = random_password.enroll_secret.result
+            }
         }
-        env {
-            name = "ENROLL_SECRET"
-            value = random_password.enroll_secret.result
-      }
     }
 }
 
