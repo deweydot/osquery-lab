@@ -5,14 +5,15 @@ import os
 app = Flask(__name__)
 
 # Server State
-HOSTNAMES = {} # map node key to hostname
-QUERY = {"id": None, "sql": None} # current query
+HOSTNAMES = {} # map node key (uuid) to hostname (human-readable)
+QUERY = {'id': None, 'sql': None} # current query
 RESULTS = {} # results from current query
 PROCESSED_NODES = set() # nodes that already been sent query
-ENROLL_SECRET = os.getenv("ENROLL_SECRET")
+ENROLL_SECRET = os.getenv('ENROLL_SECRET')
 
 @app.route('/')
-def index(): return render_template('index.html')
+def index():
+    return render_template('index.html')
 
 @app.route('/api/deploy', methods=['POST'])
 def deploy():
@@ -21,12 +22,12 @@ def deploy():
     """
     global QUERY, RESULTS, PROCESSED_NODES # update server state
     QUERY = {
-        "id": str(uuid.uuid4()), # generate unique id for query
-        "sql": request.json.get('query', ''), # update query
+        'id': str(uuid.uuid4()), # generate unique id for query
+        'sql': request.json.get('query'), # update query
     }
     RESULTS = {} # empty results
     PROCESSED_NODES = set() # empty processed nodes
-    return "ok"
+    return 'ok'
 
 @app.route('/api/results')
 def results():
@@ -35,9 +36,8 @@ def results():
     """
     ret = {}
     for node_key, rows in RESULTS.items():
-        if node_key in HOSTNAMES:
-            hostname = HOSTNAMES[node_key]
-            ret[hostname] = rows
+        hostname = HOSTNAMES.get(node_key, 'Unknown Host')
+        ret[hostname] = rows
     return jsonify(ret)
 
 @app.route('/enroll', methods=['POST'])
@@ -46,16 +46,17 @@ def enroll():
     Endpoint for enrollment of new nodes
     """
     if request.json.get('enroll_secret') != ENROLL_SECRET: return jsonify(node_invalid=True) # validate enroll secret
-    if not request.json.get('host_identifier'): return jsonify(node_invalid=True) # require hostname for enrollment
+    hostname = request.json.get('host_identifier')
+    if not hostname: return jsonify(node_invalid=True) # require hostname for enrollment
 
     node_key = str(uuid.uuid4()) # generate unique node key
-    HOSTNAMES[node_key] = request.json.get('host_identifier') # store node hostname
+    HOSTNAMES[node_key] = hostname # store node hostname
     return jsonify(node_key=node_key, node_invalid=False)
 
 @app.route('/config', methods=['POST'])
 def config():
     """
-    Endpoint for node configuration (required by osquery)
+    Endpoint for node configuration (unused for adhoc queries)
     """
     return jsonify(node_invalid=False, schedule={})
 
@@ -64,13 +65,13 @@ def read():
     """
     Endpoint for sending distributed queries to nodes
     """
-    node_key = request.json.get('node_key', '')
+    node_key = request.json.get('node_key')
     if node_key not in HOSTNAMES: return jsonify(node_invalid=True) # if host is not known invalidate node
 
     # check if node has been processed already
-    if QUERY["sql"] and node_key not in PROCESSED_NODES:
+    if QUERY['sql'] and node_key not in PROCESSED_NODES:
         PROCESSED_NODES.add(node_key) # mark node as done
-        return jsonify(queries={QUERY["id"]: QUERY["sql"]})
+        return jsonify(queries={QUERY['id']: QUERY['sql']})
     return jsonify(queries={})
 
 @app.route('/distributed_write', methods=['POST'])
@@ -78,13 +79,13 @@ def write():
     """
     Endpoint for receiving distributed queries from nodes
     """
-    node_key = request.json.get('node_key', '')
+    node_key = request.json.get('node_key')
     if node_key not in HOSTNAMES: return jsonify(node_invalid=True) # if host is not known invalidate node
     
     # parse request for results
     queries = request.json.get('queries', {})
     for query_id, rows in queries.items():
-        if query_id == QUERY["id"]: # verify response is to current query
+        if query_id == QUERY['id']: # verify response is to current query
             RESULTS[node_key] = rows # add to results
     return jsonify({})
 
