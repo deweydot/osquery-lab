@@ -5,7 +5,7 @@ provider "google" {
 }
 
 module "server" {
-    source = "../modules/fleet"
+    source = "../modules/server"
     location = var.region
 }
 

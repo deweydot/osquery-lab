@@ -1,21 +1,3 @@
-locals {
-    mysql_database = "fleet"
-    mysql_username = "fleet"
-    redis_username = "fleet"
-}
-
-module "server" {
-    source = "../modules/fleet"
-    location = var.region
-}
-
-module "mysql" {
-    source = "../mysql"
-    database = local.mysql_database
-    username = local.mysql_username
-    version = "MYSQL_8_4"
-}
-
 resource "google_cloud_run_v2_service" "service" {
     name = "fleet-lab-server"
     location = var.location
@@ -33,31 +15,31 @@ resource "google_cloud_run_v2_service" "service" {
             
             env {
                 name = "FLEET_MYSQL_ADDRESS"
-                value = "TODO"
+                value = var.mysql_address
             }
             env {
                 name = "FLEET_MYSQL_DATABASE"
-                value = local.mysql_database
+                value = "fleet"
             }
             env {
                 name = "FLEET_MYSQL_USERNAME"
-                value = local.mysql_username
+                value = "fleet"
             }
             env {
                 name = "FLEET_MYSQL_PASSWORD"
-                value = module.mysql.password
+                value = var.mysql_password
             }
             env { 
                 name = "FLEET_REDIS_ADDRESS"
-                value = "TODO"
+                value = var.redis_address
             }
             env { 
                 name = "FLEET_REDIS_USERNAME"
-                value = local.redis_username
+                value = "fleet"
             }
             env { 
                 name = "FLEET_REDIS_PASSWORD"
-                value = "TODO"
+                value = var.redis_password
             }
             env {
                 name = "FLEET_SERVER_TLS"
@@ -65,11 +47,6 @@ resource "google_cloud_run_v2_service" "service" {
             }
         }
     }
-}
-
-resource "random_password" "enroll_secret" {
-    length  = 32
-    special = false
 }
 
 resource "google_cloud_run_v2_service_iam_member" "noauth" {

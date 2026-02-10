@@ -1,7 +1,3 @@
-output "server_url" {
+output "uri" {
     value = google_cloud_run_v2_service.service.uri
-}
-
-output "enroll_secret" {
-    value = random_password.enroll_secret.result
 }

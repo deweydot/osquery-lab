@@ -3,8 +3,8 @@ resource "google_redis_instance" "instance" {
     tier = "BASIC"
     memory_size_gb = 1
     deletion_protection = false
-
-    displayName = "terraform-redis"
+    
+    displayName = "fleet-redis"
 
     lifecycle {
         prevent_destroy = true

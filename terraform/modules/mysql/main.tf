@@ -1,5 +1,5 @@
 resource "google_sql_database" "database" {
-    name = var.database
+    name = "fleet"
     instance = google_sql_database_instance.instance.name
 }
 
@@ -10,13 +10,8 @@ resource "google_sql_database_instance" "instance" {
     }
 }
 
-resource "random_password" "password" {
-    length  = 32
-    special = false
-}
-
 resource "google_sql_user" "users" {
-    name = var.username
+    name = "fleet"
     instance = google_sql_database_instance.instance.name
-    password = random_password.password.result
+    password = var.password
 }
