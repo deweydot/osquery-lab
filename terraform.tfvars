@@ -1,4 +1,3 @@
-project_id = "CHANGE_ME"
+project_id = "fmi"
 region = "us-west1"
 zone = "us-west1-a"
-server_image = "TODO"

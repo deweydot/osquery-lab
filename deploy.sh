@@ -20,6 +20,9 @@ fi
 # touch log file
 date > terraform.log
 
+# get current time
+start_time=$(date +%s)
+
 # terraform init
 echo "Initializing terraform..."
 if ! terraform -chdir="terraform/$1" init -input=false >> "terraform.log" 2>&1; then 
@@ -45,3 +48,8 @@ else
     fi
     echo "Level deployed!"
 fi
+
+# calculate time elapsed
+end_time=$(date +%s)
+elapsed=$((end_time - start_time))
+echo "Time elapsed: $elapsed seconds"
