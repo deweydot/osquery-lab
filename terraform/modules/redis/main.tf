@@ -4,7 +4,7 @@ resource "google_redis_instance" "instance" {
     memory_size_gb = 1
     deletion_protection = false
     
-    displayName = "fleet-redis"
+    displayName = "fleet"
 
     lifecycle {
         prevent_destroy = true

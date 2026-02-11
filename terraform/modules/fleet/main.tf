@@ -18,24 +18,12 @@ resource "google_cloud_run_v2_service" "service" {
                 value = var.mysql_address
             }
             env {
-                name = "FLEET_MYSQL_DATABASE"
-                value = "fleet"
-            }
-            env {
-                name = "FLEET_MYSQL_USERNAME"
-                value = "fleet"
-            }
-            env {
                 name = "FLEET_MYSQL_PASSWORD"
                 value = var.mysql_password
             }
             env { 
                 name = "FLEET_REDIS_ADDRESS"
                 value = var.redis_address
-            }
-            env { 
-                name = "FLEET_REDIS_USERNAME"
-                value = "fleet"
             }
             env { 
                 name = "FLEET_REDIS_PASSWORD"
