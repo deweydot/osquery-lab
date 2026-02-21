@@ -1,7 +1,7 @@
-variable "password" {
+variable "mysql_version" {
     type = string
 }
 
-variable "version" {
+variable "private_network" {
     type = string
 }

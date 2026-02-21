@@ -17,3 +17,7 @@ variable "redis_address" {
 variable "redis_password" {
     type = string
 }
+
+variable "vpc_connector" {
+    type = string
+}

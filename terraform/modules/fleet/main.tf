@@ -1,3 +1,23 @@
+locals {
+    admin_email = "admin@example.com"
+    admin_password = "${random_pet.admin_passphrase.id}-${format("%02d", random_integer.admin_suffix.result)}"
+}
+
+resource "random_pet" "admin_passphrase" {
+    length = 6
+    separator = "-"
+}
+
+resource "random_integer" "admin_suffix" {
+    min = 0
+    max = 99
+}
+
+resource "random_password" "enroll_secret" {
+    length  = 32
+    special = false
+}
+
 resource "google_cloud_run_v2_service" "service" {
     name = "fleet-lab-server"
     location = var.location
@@ -33,6 +53,9 @@ resource "google_cloud_run_v2_service" "service" {
                 name = "FLEET_SERVER_TLS"
                 value = false
             }
+        }
+        vpc_access {
+            connector = var.vpc_connector
         }
     }
 }

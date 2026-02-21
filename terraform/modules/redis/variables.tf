@@ -1,7 +1,7 @@
-variable "password" {
+variable "redis_version" {
     type = string
 }
 
-variable "version" {
+variable "private_network" {
     type = string
 }
