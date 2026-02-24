@@ -6,4 +6,12 @@
 
 ## Enable APIs
 
-?
+```
+gcloud services enable \
+    compute.googleapis.com \
+    run.googleapis.com \
+    sqladmin.googleapis.com \
+    redis.googleapis.com \
+    vpcaccess.googleapis.com \
+    servicenetworking.googleapis.com
+```

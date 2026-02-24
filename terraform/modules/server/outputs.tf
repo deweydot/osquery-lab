@@ -8,10 +8,10 @@ output "enroll_secret" {
 }
 
 output "admin_email" {
-    value = local.admin_email
+    value = "TODO"
 }
 
 output "admin_password" {
-    value = local.admin_password
+    value = "TODO"
     sensitive = true
 }

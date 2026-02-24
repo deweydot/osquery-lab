@@ -14,8 +14,9 @@ resource "google_sql_database_instance" "instance" {
 
     settings {
         tier = "db-f1-micro"
+        edition = "ENTERPRISE"
 
-        ip_configuration = {
+        ip_configuration {
             ipv4_enabled = false
             private_network = var.private_network
         }

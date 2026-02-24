@@ -12,6 +12,8 @@ resource "google_compute_subnetwork" "subnet" {
 resource "google_compute_global_address" "private_ips" {
     name = "fleet-databases"
     prefix_length = 16
+    address_type = "INTERNAL"
+    purpose = "VPC_PEERING"
     network = google_compute_network.network.id
 }
 
@@ -23,6 +25,8 @@ resource "google_service_networking_connection" "private_connection" {
 
 resource "google_vpc_access_connector" "vpc_connector" {
     name = "fleet-vpc"
+    min_instances = 2
+    max_instances = 3
     subnet {
         name = google_compute_subnetwork.subnet.name
     }
