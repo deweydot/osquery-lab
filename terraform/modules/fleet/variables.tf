@@ -1,3 +1,7 @@
+variable "fleet_version" {
+    type = string
+}
+
 variable "location" {
     type = string
 }
@@ -18,6 +22,6 @@ variable "redis_password" {
     type = string
 }
 
-variable "vpc_connector" {
+variable "vpc_subnet" {
     type = string
 }

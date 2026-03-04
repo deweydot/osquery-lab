@@ -3,28 +3,24 @@ resource "random_password" "password" {
     special = false
 }
 
-resource "google_sql_database" "database" {
-    name = "fleet"
-    instance = google_sql_database_instance.instance.name
-}
+resource "google_compute_instance" "instance" {
+    name = "fleet-mysql-instance"
+    machine_type = "e2-micro"
 
-resource "google_sql_database_instance" "instance" {
-    database_version = var.mysql_version
-    deletion_protection = false
-
-    settings {
-        tier = "db-f1-micro"
-        edition = "ENTERPRISE"
-
-        ip_configuration {
-            ipv4_enabled = false
-            private_network = var.private_network
+    boot_disk {
+        initialize_params {
+            image = "cos-cloud/cos-121-lts"
         }
     }
-}
+    
+    network_interface {
+        subnet = var.vpc_subnet
+    }
 
-resource "google_sql_user" "users" {
-    name = "fleet"
-    instance = google_sql_database_instance.instance.name
-    password = random_password.password.result
+    metadata = {
+        gce-container-declaration = templatefile("${path.module}/mysql.yaml", {
+            version = var.mysql_version
+            password = random_password.password.result
+        })
+    }
 }

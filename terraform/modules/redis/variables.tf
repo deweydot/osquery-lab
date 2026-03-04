@@ -2,6 +2,6 @@ variable "redis_version" {
     type = string
 }
 
-variable "private_network" {
+variable "vpc_subnet" {
     type = string
 }

@@ -1,8 +1,8 @@
 output "ip_address" {
-    value = google_redis_instance.instance.host
+    value = google_compute_instance.instance.network_interface.0.network_ip
 }
 
 output "password" {
-    value = google_redis_instance.instance.auth_string
+    value = random_password.password.result
     sensitive = true
 }

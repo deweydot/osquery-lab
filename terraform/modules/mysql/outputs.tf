@@ -1,5 +1,5 @@
 output "ip_address" {
-    value = google_sql_database_instance.instance.private_ip_address
+    value = google_compute_instance.instance.network_interface.0.network_ip
 }
 
 output "password" {

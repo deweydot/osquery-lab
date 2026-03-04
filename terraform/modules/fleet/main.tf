@@ -1,16 +1,6 @@
-locals {
-    admin_email = "admin@example.com"
-    admin_password = "${random_pet.admin_passphrase.id}-${format("%02d", random_integer.admin_suffix.result)}"
-}
-
 resource "random_pet" "admin_passphrase" {
-    length = 6
+    length = 4
     separator = "-"
-}
-
-resource "random_integer" "admin_suffix" {
-    min = 0
-    max = 99
 }
 
 resource "random_password" "enroll_secret" {
@@ -31,7 +21,7 @@ resource "google_cloud_run_v2_service" "service" {
 
     template {
         containers {
-            image = "fleetdm/fleet:latest"
+            image = "fleetdm/fleet:${var.fleet_version}"
             
             env {
                 name = "FLEET_MYSQL_ADDRESS"
@@ -55,7 +45,10 @@ resource "google_cloud_run_v2_service" "service" {
             }
         }
         vpc_access {
-            connector = var.vpc_connector
+            network_interfaces {
+                subnetwork = var.vpc_subnet
+            }
+            egress = "ALL_TRAFFIC"
         }
     }
 }

@@ -1,14 +1,26 @@
-resource "google_redis_instance" "instance" {
-    name = "memory-cache"
-    tier = "BASIC"
-    memory_size_gb = 1
+resource "random_password" "password" {
+    length  = 32
+    special = false
+}
 
-    redis_version = var.redis_version
-    display_name = "fleet"
-    auth_enabled = true
-    authorized_network = var.private_network
+resource "google_compute_instance" "instance" {
+    name = "fleet-redis-instance"
+    machine_type = "e2-micro"
 
-    lifecycle {
-        prevent_destroy = true
+    boot_disk {
+        initialize_params {
+            image = "cos-cloud/cos-121-lts"
+        }
+    }
+    
+    network_interface {
+        subnet = var.vpc_subnet
+    }
+
+    metadata = {
+        gce-container-declaration = templatefile("${path.module}/redis.yaml", {
+            version = var.redis_version
+            password = random_password.password.result
+        })
     }
 }

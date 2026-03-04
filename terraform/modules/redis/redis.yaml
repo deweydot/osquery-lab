@@ -1,0 +1,18 @@
+spec:
+  containers:
+    - name: redis
+      image: redis:${version}
+      args:
+        - "redis-server"
+        - "--requirepass"
+        - "${password}"
+      stdin: false
+      tty: false
+      volumeMounts:
+        - name: disk-storage
+          mountPath: /data
+  volumes:
+    - name: disk-storage
+      hostPath:
+        path: /mnt/stateful_partition/redis
+  restartPolicy: Always
