@@ -14,7 +14,7 @@ resource "google_compute_instance" "instance" {
     }
     
     network_interface {
-        subnet = var.vpc_subnet
+        subnetwork = var.vpc_subnet
     }
 
     metadata = {

@@ -5,20 +5,20 @@ resource "google_compute_network" "internal" {
 
 resource "google_compute_subnetwork" "internal" {
     name = "fleet-subnet"
-    ip_cidr_range = "10.0.0.0/28"
-    network = google_compute_network.network.id
+    ip_cidr_range = "10.0.0.0/24"
+    network = google_compute_network.internal.id
 }
 
 module "mysql" {
     source = "../mysql"
     mysql_version = "latest"
-    vpc_subnet = google_compute_subnetwork.internal
+    vpc_subnet = google_compute_subnetwork.internal.id
 }
 
 module "redis" {
     source = "../redis"
     redis_version = "latest"
-    vpc_subnet = google_compute_subnetwork.internal
+    vpc_subnet = google_compute_subnetwork.internal.id
 }
 
 module "fleet" {
@@ -32,5 +32,5 @@ module "fleet" {
     redis_password = module.redis.password
     
     location = var.region
-    vpc_subnet = google_compute_subnetwork.internal
+    vpc_subnet = google_compute_subnetwork.internal.id
 }
