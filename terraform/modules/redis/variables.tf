@@ -1,11 +1,7 @@
-variable "redis_version" {
+variable "region" {
     type = string
 }
 
-variable "vpc" {
-    type = object({
-        network_name = string
-        fleet_range = string
-        compute_subnet  = string
-    })
+variable "redis_version" {
+    type = string
 }

@@ -9,7 +9,5 @@
 ```
 gcloud services enable \
     compute.googleapis.com \
-    run.googleapis.com \
-    cloudresourcemanager.googleapis.com \
-    sqladmin.googleapis.com
+    run.googleapis.com
 ```

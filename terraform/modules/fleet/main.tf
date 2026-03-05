@@ -8,9 +8,14 @@ resource "random_password" "enroll_secret" {
     special = false
 }
 
+data "google_compute_subnetwork" "subnet" {
+    name = "fleet-run-subnet"
+    region = var.region
+}
+
 resource "google_cloud_run_v2_service" "service" {
     name = "fleet-lab-server"
-    location = var.location
+    location = var.region
     deletion_protection = false
     ingress = "INGRESS_TRAFFIC_ALL"
 
@@ -18,7 +23,7 @@ resource "google_cloud_run_v2_service" "service" {
         min_instance_count = 0
         max_instance_count = 1
     }
-
+    
     template {
         containers {
             image = "fleetdm/fleet:${var.fleet_version}"
@@ -46,7 +51,7 @@ resource "google_cloud_run_v2_service" "service" {
         }
         vpc_access {
             network_interfaces {
-                subnetwork = var.run_subnet
+                subnetwork = data.google_compute_subnetwork.subnet.id
             }
             egress = "PRIVATE_RANGES_ONLY"
         }
