@@ -22,6 +22,6 @@ variable "redis_password" {
     type = string
 }
 
-variable "vpc_subnet" {
+variable "run_subnet" {
     type = string
 }

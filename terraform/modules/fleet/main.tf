@@ -16,7 +16,7 @@ resource "google_cloud_run_v2_service" "service" {
 
     scaling {
         min_instance_count = 0
-        max_instance_count = 2
+        max_instance_count = 1
     }
 
     template {
@@ -46,9 +46,9 @@ resource "google_cloud_run_v2_service" "service" {
         }
         vpc_access {
             network_interfaces {
-                subnetwork = var.vpc_subnet
+                subnetwork = var.run_subnet
             }
-            egress = "ALL_TRAFFIC"
+            egress = "PRIVATE_RANGES_ONLY"
         }
     }
 }

@@ -3,22 +3,36 @@ resource "google_compute_network" "internal" {
     auto_create_subnetworks = "false"
 }
 
-resource "google_compute_subnetwork" "internal" {
-    name = "fleet-subnet"
-    ip_cidr_range = "10.0.0.0/24"
+resource "google_compute_subnetwork" "compute" {
+    name = "fleet-compute-subnet"
+    ip_cidr_range = "10.128.0.0/24"
+    network = google_compute_network.internal.id
+}
+
+resource "google_compute_subnetwork" "run" {
+    name = "fleet-run-subnet"
+    ip_cidr_range = "10.128.1.0/24"
     network = google_compute_network.internal.id
 }
 
 module "mysql" {
     source = "../mysql"
     mysql_version = "latest"
-    vpc_subnet = google_compute_subnetwork.internal.id
+    vpc = {
+        network_name = google_compute_network.internal.name
+        fleet_range = google_compute_subnetwork.run.ip_cidr_range
+        compute_subnet = google_compute_subnetwork.compute.id
+    }
 }
 
 module "redis" {
     source = "../redis"
     redis_version = "latest"
-    vpc_subnet = google_compute_subnetwork.internal.id
+    vpc = {
+        network_name = google_compute_network.internal.name
+        fleet_range = google_compute_subnetwork.run.ip_cidr_range
+        compute_subnet = google_compute_subnetwork.compute.id
+    }
 }
 
 module "fleet" {
@@ -32,5 +46,5 @@ module "fleet" {
     redis_password = module.redis.password
     
     location = var.region
-    vpc_subnet = google_compute_subnetwork.internal.id
+    run_subnet = google_compute_subnetwork.run.id
 }
