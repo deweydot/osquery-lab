@@ -8,6 +8,18 @@ data "google_compute_subnetwork" "compute" {
     region = var.region
 }
 
+resource "google_compute_router_nat" "nat" {
+    name = "fleet-router-nat"
+    router = "fleet-router"
+    nat_ip_allocate_option = "AUTO_ONLY"
+
+    source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
+    subnetwork {
+        name = data.google_compute_subnetwork.compute.id
+        source_ip_ranges_to_nat = ["PRIMARY_IP_RANGE"]
+    }
+}
+
 module "mysql" {
     source = "../mysql"
     region = var.region

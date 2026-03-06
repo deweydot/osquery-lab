@@ -51,15 +51,3 @@ resource "google_compute_router" "router" {
     name = "fleet-router"
     network = google_compute_network.network.name
 }
-
-resource "google_compute_router_nat" "nat" {
-    name = "fleet-router-nat"
-    router = google_compute_router.router.name
-    nat_ip_allocate_option = "AUTO_ONLY"
-
-    source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
-    subnetwork {
-        name = google_compute_subnetwork.compute.id
-        source_ip_ranges_to_nat = ["PRIMARY_IP_RANGE"]
-    }
-}
