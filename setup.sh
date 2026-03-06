@@ -21,6 +21,7 @@ date > terraform.log
 start_time=$(date +%s)
 
 # enable required services
+echo "Enabling services..."
 gcloud services enable \
     compute.googleapis.com \
     run.googleapis.com

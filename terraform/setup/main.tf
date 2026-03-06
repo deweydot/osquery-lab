@@ -1,3 +1,9 @@
+provider "google" {
+    project = var.project_id
+    region = var.region
+    zone = var.zone
+}
+
 resource "google_compute_network" "network" {
     name = "fleet-network"
     auto_create_subnetworks = "false"
@@ -23,7 +29,7 @@ resource "google_compute_firewall" "mysql" {
         protocol = "tcp"
         ports = ["3306"]
     }
-    
+
     source_ranges = [google_compute_subnetwork.run.ip_cidr_range]
     target_tags = ["mysql"]
 }
