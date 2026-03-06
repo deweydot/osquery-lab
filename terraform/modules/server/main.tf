@@ -22,14 +22,12 @@ resource "google_compute_router_nat" "nat" {
 
 module "mysql" {
     source = "../mysql"
-    region = var.region
     subnet = data.google_compute_subnetwork.compute.id
     mysql_version = "latest"
 }
 
 module "redis" {
     source = "../redis"
-    region = var.region
     subnet = data.google_compute_subnetwork.compute.id
     redis_version = "latest"
 }
@@ -39,6 +37,7 @@ module "fleet" {
     region = var.region
     subnet = data.google_compute_subnetwork.run.id
     fleet_version = "latest"
+    
     mysql_address = module.mysql.ip_address
     mysql_password = module.mysql.password
     redis_address = module.redis.ip_address
