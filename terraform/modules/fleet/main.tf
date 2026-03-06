@@ -11,6 +11,8 @@ resource "random_password" "enroll_secret" {
 resource "google_cloud_run_v2_job" "prepare_db" {
     name     = "fleet-prepare-db"
     location = "us-central1"
+    deletion_protection = false
+
     template {
         template {
             containers {
@@ -43,8 +45,6 @@ resource "google_cloud_run_v2_service" "service" {
     location = var.region
     deletion_protection = false
     ingress = "INGRESS_TRAFFIC_ALL"
-
-    depends_on = []
 
     scaling {
         min_instance_count = 0
