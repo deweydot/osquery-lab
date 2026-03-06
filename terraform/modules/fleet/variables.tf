@@ -2,7 +2,11 @@ variable "fleet_version" {
     type = string
 }
 
-variable "location" {
+variable "region" {
+    type = string
+}
+
+variable "subnet" {
     type = string
 }
 
@@ -19,9 +23,5 @@ variable "redis_address" {
 }
 
 variable "redis_password" {
-    type = string
-}
-
-variable "run_subnet" {
     type = string
 }

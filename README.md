@@ -11,3 +11,11 @@ gcloud services enable \
     compute.googleapis.com \
     run.googleapis.com
 ```
+
+## Update terraform.tfvars
+
+`nano terraform.tfvars`
+
+## Setup the project
+
+`./deploy.sh setup`

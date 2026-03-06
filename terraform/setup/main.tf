@@ -49,6 +49,7 @@ resource "google_compute_firewall" "redis" {
 
 resource "google_compute_router" "router" {
     name = "fleet-router"
+    network = google_compute_network.network.name
 }
 
 resource "google_compute_router_nat" "nat" {

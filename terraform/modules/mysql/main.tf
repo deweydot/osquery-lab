@@ -3,11 +3,6 @@ resource "random_password" "password" {
     special = false
 }
 
-data "google_compute_subnetwork" "subnet" {
-    name = "fleet-compute-subnet"
-    region = var.region
-}
-
 resource "google_compute_instance" "instance" {
     name = "fleet-mysql-instance"
     machine_type = "e2-micro"
