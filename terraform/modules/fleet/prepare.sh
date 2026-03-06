@@ -2,8 +2,8 @@
 
 echo "Preparing database..."
 
-while i in {1..5} ; do
-    if /usr/bin/fleet prepare db --rerun_migrations ; then
+for i in {1..5} ; do
+    if /usr/bin/fleet prepare db ; then
         exit 0
     fi
 
@@ -11,7 +11,7 @@ while i in {1..5} ; do
     echo "Database preparation failed. Retrying..."
 done
 
-if /usr/bin/fleet prepare db --rerun_migrations ; then
+if /usr/bin/fleet prepare db ; then
     exit 0
 fi
 

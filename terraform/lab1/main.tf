@@ -4,6 +4,12 @@ provider "google" {
     zone = var.zone
 }
 
+provider "google-beta" {
+    project = var.project_id
+    region = var.region
+    zone = var.zone
+}
+
 module "server" {
     source = "../modules/server"
     region = var.region

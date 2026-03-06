@@ -9,9 +9,11 @@ resource "random_password" "enroll_secret" {
 }
 
 resource "google_cloud_run_v2_job" "prepare_db" {
-    name     = "fleet-prepare-db"
-    location = "us-central1"
+    provider = google-beta
+    name = "fleet-prepare-db"
+    location = var.region
     deletion_protection = false
+    run_execution_token = "run-once-created"
 
     template {
         template {

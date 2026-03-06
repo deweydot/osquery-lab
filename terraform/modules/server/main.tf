@@ -23,13 +23,13 @@ resource "google_compute_router_nat" "nat" {
 module "mysql" {
     source = "../mysql"
     subnet = data.google_compute_subnetwork.compute.id
-    mysql_version = "latest"
+    mysql_version = "8.4"
 }
 
 module "redis" {
     source = "../redis"
     subnet = data.google_compute_subnetwork.compute.id
-    redis_version = "latest"
+    redis_version = "6.2"
 }
 
 module "fleet" {
