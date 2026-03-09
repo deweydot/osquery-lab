@@ -11,8 +11,7 @@ provider "google-beta" {
 }
 
 module "server" {
-    source = "../modules/server"
-    region = var.region
+    source = "../modules/fleet"
 }
 
 resource "google_compute_instance" "node1" {

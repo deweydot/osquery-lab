@@ -1,97 +1,92 @@
-resource "random_pet" "admin_passphrase" {
-    length = 4
-    separator = "-"
+data "google_compute_subnetwork" "subnet" {
+    name = "fleet-subnet"
 }
 
-resource "random_password" "enroll_secret" {
-    length  = 32
+resource "google_compute_address" "internal" {
+    name = "fleet-internal"
+    subnetwork = data.google_compute_subnetwork.subnet.id
+    address_type = "INTERNAL"
+}
+
+resource "google_compute_address" "external" {
+    name = "fleet-external"
+    address_type = "EXTERNAL"
+}
+
+resource "google_compute_router_nat" "nat" {
+    name = "fleet-router-nat"
+    router = "fleet-router"
+    nat_ip_allocate_option = "AUTO_ONLY"
+
+    source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
+    subnetwork {
+        name = data.google_compute_subnetwork.subnet.id
+        source_ip_ranges_to_nat = ["PRIMARY_IP_RANGE"]
+    }
+}
+
+resource "random_password" "mysql" {
+    length = 32
     special = false
 }
 
-resource "google_cloud_run_v2_job" "prepare_db" {
-    provider = google-beta
-    name = "fleet-prepare-db"
-    location = var.region
-    deletion_protection = false
-    run_execution_token = "run-once-created"
-
-    template {
-        template {
-            containers {
-                image = "fleetdm/fleet:${var.fleet_version}"
-                command = ["/bin/sh", "-c"]
-                args = ["until /usr/bin/fleet prepare db; do echo "Retrying..." && sleep 5; done"]
-
-                env {
-                    name = "FLEET_MYSQL_ADDRESS"
-                    value = "${var.mysql_address}:3306"
-                }
-                env {
-                    name = "FLEET_MYSQL_PASSWORD"
-                    value = var.mysql_password
-                }
-            }
-            
-            vpc_access {
-                network_interfaces {
-                    subnetwork = var.subnet
-                }
-                egress = "PRIVATE_RANGES_ONLY"
-            }
-        }
-    }
+resource "random_password" "redis" {
+    length = 32
+    special = false
 }
 
-resource "google_cloud_run_v2_service" "service" {
-    name = "fleet-lab-server"
-    location = var.region
-    deletion_protection = false
-    ingress = "INGRESS_TRAFFIC_ALL"
-
-    scaling {
-        min_instance_count = 0
-        max_instance_count = 1
-    }
-
-    template {
-        containers {
-            image = "fleetdm/fleet:${var.fleet_version}"
-            
-            env {
-                name = "FLEET_MYSQL_ADDRESS"
-                value = "${var.mysql_address}:3306"
-            }
-            env {
-                name = "FLEET_MYSQL_PASSWORD"
-                value = var.mysql_password
-            }
-            env { 
-                name = "FLEET_REDIS_ADDRESS"
-                value = "${var.redis_address}:6379"
-            }
-            env { 
-                name = "FLEET_REDIS_PASSWORD"
-                value = var.redis_password
-            }
-            env {
-                name = "FLEET_SERVER_TLS"
-                value = false
-            }
-        }
-        vpc_access {
-            network_interfaces {
-                subnetwork = var.subnet
-            }
-            egress = "PRIVATE_RANGES_ONLY"
-        }
-    }
-
-    depends_on = [google_cloud_run_v2_job.prepare_db]
+resource "tls_private_key" "key" {
+    algorithm = "RSA"
+    rsa_bits = 2048
 }
 
-resource "google_cloud_run_v2_service_iam_member" "noauth" {
-    location = google_cloud_run_v2_service.service.location
-    name     = google_cloud_run_v2_service.service.name
-    role     = "roles/run.invoker"
-    member   = "allUsers"
+resource "tls_self_signed_cert" "cert" {
+    private_key_pem = tls_private_key.key.private_key_pem
+
+    ip_addresses = [
+        google_compute_address.internal.address
+        google_compute_address.external.address
+    ]
+
+    subject {
+        common_name = google_compute_address.external.address
+    }
+
+    validity_period_hours = 8760
+
+    allowed_uses = [
+        "key_encipherment",
+        "digital_signature",
+        "server_auth",
+    ]
+}
+
+resource "google_compute_instance" "instance" {
+    name         = "server-vm"
+    machine_type = "e2-medium"
+
+    boot_disk {
+        initialize_params {
+            image = "ubuntu-os-cloud/ubuntu-2404-lts-amd64"
+        }
+    }
+
+    network_interface {
+        subnetwork = data.google_compute_subnetwork.subnet.id
+        network_ip = google_compute_address.internal.address
+        access_config {
+            nat_ip = google_compute_address.external.address
+        }
+    }
+
+    metadata {
+        user-data = templatefile("${path.module}/cloud-config.yaml", {
+            cert_pem = tls_self_signed_cert.cert.cert_pem
+            key_pem = tls_private_key.key.private_key_pem
+            docker_compose = templatefile("${path.module}/compose.yaml", {
+                mysql_password = random_password.mysql.result
+                redis_password = random_password.redis.result
+            })
+        })
+    }
 }

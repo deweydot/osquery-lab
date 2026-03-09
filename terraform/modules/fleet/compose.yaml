@@ -1,0 +1,64 @@
+services:
+  mysql:
+    image: mysql:8.0-debian
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=fleet
+      - MYSQL_USER=fleet
+      - MYSQL_PASSWORD=${mysql_password}
+    networks:
+      - fleet_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "fleet", "-p${mysql_password}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  redis:
+    image: redis:7.0-alpine
+    command: ["redis-server", "--requirepass", "${redis_password}"]
+    networks:
+      - fleet_net
+
+  prepare_db:
+    image: fleetdm/fleet:latest
+    command: ["fleet", "prepare", "db", "--no-prompt"]
+    environment:
+      - FLEET_MYSQL_ADDRESS=mysql:3306
+      - FLEET_MYSQL_PASSWORD=${mysql_password}
+    networks:
+      - fleet_net
+    depends_on:
+      mysql:
+        condition: service_healthy
+  
+  fleet:
+    image: fleetdm/fleet:latest
+    environment:
+      - FLEET_MYSQL_ADDRESS=mysql:3306
+      - FLEET_MYSQL_PASSWORD=${mysql_password}
+      - FLEET_REDIS_ADDRESS=redis:6379
+      - FLEET_REDIS_PASSWORD=${redis_password}
+      - FLEET_SERVER_TLS_CERT=/etc/fleet/fleet.cert
+      - FLEET_SERVER_TLS_KEY=/etc/fleet/fleet.key
+    secrets:
+      - source: fleet_cert
+        target: /etc/fleet/fleet.cert
+      - source: fleet_key
+        target: /etc/fleet/fleet.key
+    networks:
+      - fleet_net
+    depends_on:
+      prepare_db:
+        condition: service_completed_successfully
+
+secrets:
+  fleet_cert:
+    file: /opt/app/secrets/cert.pem
+  fleet_key:
+    file: /opt/app/secrets/key.pem
+
+networks:
+  fleet_net:
+    driver: bridge
