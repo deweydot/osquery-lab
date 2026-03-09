@@ -20,7 +20,7 @@ resource "google_cloud_run_v2_job" "prepare_db" {
             containers {
                 image = "fleetdm/fleet:${var.fleet_version}"
                 command = ["/bin/sh", "-c"]
-                args = [file("${path.module}/prepare.sh")]
+                args = ["until /usr/bin/fleet prepare db; do echo "Retrying..." && sleep 5; done"]
 
                 env {
                     name = "FLEET_MYSQL_ADDRESS"
