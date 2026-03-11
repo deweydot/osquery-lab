@@ -1,11 +1,41 @@
-data "google_compute_subnetwork" "run" {
-    name = "fleet-run-subnet"
-    region = var.region
+resource "google_compute_network" "network" {
+    name = "fleet-network"
+    auto_create_subnetworks = "false"
 }
 
-data "google_compute_subnetwork" "compute" {
-    name = "fleet-compute-subnet"
-    region = var.region
+resource "google_compute_subnetwork" "subnet" {
+    name = "fleet-subnet"
+    ip_cidr_range = "10.128.0.0/24"
+    network = google_compute_network.network.id
+}
+
+resource "google_compute_firewall" "fleet" {
+    name = "allow-web-server"
+    network = google_compute_network.network.name
+    
+    allow {
+        protocol = "tcp"
+        ports = ["8080"]
+    }
+
+    source_ranges = ["0.0.0.0/0"]
+    target_tags = ["fleet-server"]
+}
+
+resource "google_compute_router" "router" {
+    name = "fleet-router"
+    network = google_compute_network.network.name
+}
+
+resource "google_compute_address" "internal" {
+    name = "server-internal"
+    subnetwork = google_compute_subnetwork.subnet.id
+    address_type = "INTERNAL"
+}
+
+resource "google_compute_address" "external" {
+    name = "server-external"
+    address_type = "EXTERNAL"
 }
 
 resource "google_compute_router_nat" "nat" {
@@ -15,31 +45,73 @@ resource "google_compute_router_nat" "nat" {
 
     source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
     subnetwork {
-        name = data.google_compute_subnetwork.compute.id
+        name = google_compute_subnetwork.subnet.id
         source_ip_ranges_to_nat = ["PRIMARY_IP_RANGE"]
     }
 }
 
-module "mysql" {
-    source = "../mysql"
-    subnet = data.google_compute_subnetwork.compute.id
-    mysql_version = "8.4"
+resource "random_password" "mysql" {
+    length = 32
+    special = false
 }
 
-module "redis" {
-    source = "../redis"
-    subnet = data.google_compute_subnetwork.compute.id
-    redis_version = "6.2"
+resource "random_password" "redis" {
+    length = 32
+    special = false
 }
 
-module "fleet" {
-    source = "../fleet"
-    region = var.region
-    subnet = data.google_compute_subnetwork.run.id
-    fleet_version = "latest"
+resource "tls_private_key" "key" {
+    algorithm = "RSA"
+    rsa_bits = 2048
+}
+
+resource "tls_self_signed_cert" "cert" {
+    private_key_pem = tls_private_key.key.private_key_pem
+
+    ip_addresses = [
+        google_compute_address.internal.address
+        google_compute_address.external.address
+    ]
+
+    subject {
+        common_name = google_compute_address.external.address
+    }
+
+    validity_period_hours = 8760
+
+    allowed_uses = [
+        "key_encipherment",
+        "digital_signature",
+        "server_auth",
+    ]
+}
+
+resource "google_compute_instance" "instance" {
+    name         = "server-vm"
+    machine_type = "e2-medium"
+
+    boot_disk {
+        initialize_params {
+            image = "ubuntu-os-cloud/ubuntu-2404-lts-amd64"
+        }
+    }
     
-    mysql_address = module.mysql.ip_address
-    mysql_password = module.mysql.password
-    redis_address = module.redis.ip_address
-    redis_password = module.redis.password
+    network_interface {
+        subnetwork = google_compute_subnetwork.subnet.id
+        network_ip = google_compute_address.internal.address
+        access_config {
+            nat_ip = google_compute_address.external.address
+        }
+    }
+
+    metadata {
+        user-data = templatefile("${path.module}/cloud-config.yaml", {
+            cert_pem = tls_self_signed_cert.cert.cert_pem
+            key_pem = tls_private_key.key.private_key_pem
+            docker_compose = templatefile("${path.module}/compose.yaml", {
+                mysql_password = random_password.mysql.result
+                redis_password = random_password.redis.result
+            })
+        })
+    }
 }

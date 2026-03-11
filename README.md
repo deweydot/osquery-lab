@@ -1,21 +1,7 @@
-# Prerequisites
-
-## Install `fleetctl`
-
-`curl -sSL https://fleetdm.com/resources/install-fleetctl.sh | bash`
-
-## Enable APIs
-
-```
-gcloud services enable \
-    compute.googleapis.com \
-    run.googleapis.com
-```
-
-## Update terraform.tfvars
+# Update terraform.tfvars
 
 `nano terraform.tfvars`
 
-## Setup the project
+# Setup the project
 
-`./deploy.sh setup`
+`./deploy.sh lab1`

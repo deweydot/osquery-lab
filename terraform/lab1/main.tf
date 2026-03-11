@@ -11,11 +11,11 @@ provider "google-beta" {
 }
 
 module "server" {
-    source = "../modules/fleet"
+    source = "../modules/server"
 }
 
 resource "google_compute_instance" "node1" {
-    name         = "lab1-instance"
+    name = "lab1-instance"
     machine_type = "e2-micro"
 
     boot_disk {
