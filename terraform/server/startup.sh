@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Install docker compose
-apt-get update -y
+apt-get update
 apt-get install -y docker.io docker-compose-v2
 
 # Create secret files

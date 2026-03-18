@@ -1,3 +1,5 @@
 project_id = "changeme"
 region = "us-west1"
 zone = "us-west1-b"
+server_ip = "changeme"
+enroll_secret = "changeme"

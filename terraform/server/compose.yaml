@@ -23,8 +23,8 @@ services:
   
   fleet:
     image: fleetdm/fleet:latest
-    command: ["/bin/sh", "-c"]
-    args: ["fleet", "prepare", "db", "--no-prompt", "&&", "fleet", "serve"]
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["fleet prepare db --no-prompt && fleet serve"]
     ports:
       - "8080:8080"
     environment:
@@ -42,30 +42,6 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    
-    fleet-setup:
-      image: fleetdm/fleet:latest
-      networks:
-        - fleet_net
-      depends_on:
-        - fleet
-      restart: on-failure
-      entrypoint: ["/bin/sh", "-c"]
-      command:
-        - |
-          fleetctl setup \
-            --address="https://fleet:8080" \
-            --insecure-skip-tls-verify \
-            --email="admin@example.com" \
-            --password="${admin_password}" \
-            --name="Admin" \
-            --org-name="My Organization"
-
-          fleetctl apply -f /etc/fleet/enroll_secret.yml \
-            --address="https://fleet:8080" \
-            --insecure-skip-tls-verify \
-            --email="admin@example.com" \
-            --password="${admin_password}"
     
 networks:
   fleet_net:

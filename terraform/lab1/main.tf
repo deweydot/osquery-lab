@@ -4,10 +4,6 @@ provider "google" {
     zone = var.zone
 }
 
-module "server" {
-    source = "../modules/server"
-}
-
 resource "google_compute_instance" "node1" {
     name = "lab1-instance"
     machine_type = "e2-micro"
@@ -17,13 +13,13 @@ resource "google_compute_instance" "node1" {
             image = "ubuntu-os-cloud/ubuntu-2404-lts-amd64"
         }
     }
-    
+
     network_interface {
         subnetwork = module.server.subnet
     }
 
     metadata_startup_script = templatefile("${path.module}/startup.sh", {
-        server_hostname = "${module.server.internal_ip}:8080"
-        enroll_secret = module.server.enroll_secret
+        server_hostname = "${var.server_ip}:8080"
+        enroll_secret = var.enroll_secret
     })
 }

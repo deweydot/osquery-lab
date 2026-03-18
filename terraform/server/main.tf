@@ -1,3 +1,9 @@
+provider "google" {
+    project = var.project_id
+    region = var.region
+    zone = var.zone
+}
+
 resource "google_compute_network" "network" {
     name = "fleet-network"
     auto_create_subnetworks = "false"
@@ -89,6 +95,8 @@ resource "tls_self_signed_cert" "cert" {
 resource "google_compute_instance" "instance" {
     name         = "server-vm"
     machine_type = "e2-medium"
+    
+    tags = ["fleet-server"]
 
     boot_disk {
         initialize_params {
