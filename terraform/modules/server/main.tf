@@ -104,14 +104,14 @@ resource "google_compute_instance" "instance" {
         }
     }
 
-    metadata {
-        user-data = templatefile("${path.module}/cloud-config.yaml", {
-            cert_pem = tls_self_signed_cert.cert.cert_pem
-            key_pem = tls_private_key.key.private_key_pem
-            docker_compose = templatefile("${path.module}/compose.yaml", {
-                mysql_password = random_password.mysql.result
-                redis_password = random_password.redis.result
-            })
+    metadata_startup_script = templatefile("${path.module}/startup.sh", {
+        cert_pem = tls_self_signed_cert.cert.cert_pem
+        key_pem = tls_private_key.key.private_key_pem
+        enroll_secret = "CHANGEME"
+        docker_compose = templatefile("${path.module}/compose.yaml", {
+            mysql_password = random_password.mysql.result
+            redis_password = random_password.redis.result
+            admin_password = "CHANGEME"
         })
-    }
+    })
 }

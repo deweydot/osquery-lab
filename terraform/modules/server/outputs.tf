@@ -1,8 +1,9 @@
 output "enroll_secret" {
-    value = "TODO"
+    value = "CHANGEME"
     sensitive = true
 }
 
 output "admin_password" {
     value = "TODO"
+    sensitive = true
 }
