@@ -4,12 +4,6 @@ provider "google" {
     zone = var.zone
 }
 
-provider "google-beta" {
-    project = var.project_id
-    region = var.region
-    zone = var.zone
-}
-
 module "server" {
     source = "../modules/server"
 }
@@ -30,7 +24,7 @@ resource "google_compute_instance" "node1" {
     }
 
     metadata_startup_script = templatefile("${path.module}/startup.sh", {
-        server_hostname = trimprefix(module.server.server_url, "https://")
+        server_hostname = "${module.server.ip_address}:8080"
         enroll_secret = module.server.enroll_secret
     })
 }

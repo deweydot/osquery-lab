@@ -69,7 +69,7 @@ resource "tls_self_signed_cert" "cert" {
     private_key_pem = tls_private_key.key.private_key_pem
 
     ip_addresses = [
-        google_compute_address.internal.address
+        google_compute_address.internal.address,
         google_compute_address.external.address
     ]
 
