@@ -17,14 +17,13 @@ resource "google_compute_instance" "node1" {
             image = "ubuntu-os-cloud/ubuntu-2404-lts-amd64"
         }
     }
-
+    
     network_interface {
-        network = "default"
-        access_config { }
+        subnetwork = module.server.subnet
     }
 
     metadata_startup_script = templatefile("${path.module}/startup.sh", {
-        server_hostname = "${module.server.ip_address}:8080"
+        server_hostname = "${module.server.internal_ip}:8080"
         enroll_secret = module.server.enroll_secret
     })
 }

@@ -15,7 +15,7 @@ resource "google_compute_firewall" "fleet" {
     
     allow {
         protocol = "tcp"
-        ports = ["8080"]
+        ports = ["8080", "22"]
     }
 
     source_ranges = ["0.0.0.0/0"]
