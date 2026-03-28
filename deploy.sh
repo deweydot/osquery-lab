@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # parse flags
 DESTROY=false
@@ -13,12 +14,15 @@ shift $((OPTIND - 1))
 
 # usage msg if arg not given
 if [[ -z "$1" ]]; then
-    echo "Usage: ./deploy.sh [-d] <level-name>"
+    echo "Usage: ./deploy.sh [-d] <level>"
     exit 1
 fi
 
 # touch log file
 date > terraform.log
+
+# get current time
+start_time=$(date +%s)
 
 # terraform init
 echo "Initializing terraform..."
@@ -43,5 +47,19 @@ else
         echo "Error: 'terraform apply' failed. See terraform.log for details."
         exit 1
     fi
+    # Get terraform output
+    read -r password server <<< $(terraform -chdir=terraform/lab1 output -json | jq -r '[.admin_password.value, .external_ip.value] | join(" ")')
+    # Wait for server to pass health check
+    echo "Waiting for server to be ready..."
+    until curl -k --fail "https://$server:8080/healthz" >/dev/null 2>&1; do
+        sleep 2
+    done
+    echo "Server URL: https://$server:8080"
+    echo "Login with 'admin@pdx.edu' and '$password'"
     echo "Level deployed!"
 fi
+
+# calculate time elapsed
+end_time=$(date +%s)
+elapsed=$((end_time - start_time))
+echo "Time elapsed: $elapsed seconds"

@@ -9,7 +9,3 @@ variable "region" {
 variable "zone" {
     type = string
 }
-
-variable "server_image" {
-    type = string
-}

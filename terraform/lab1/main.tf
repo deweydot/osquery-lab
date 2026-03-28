@@ -1,17 +1,30 @@
 provider "google" {
     project = var.project_id
-    region  = var.region
-    zone    = var.zone
+    region = var.region
+    zone = var.zone
+}
+
+resource "random_password" "admin" {
+    length = 16
+    special = true
+    numeric = true
+    min_special = 1
+    min_numeric = 1
+}
+
+resource "random_password" "enroll" {
+    length = 32
+    special = false
 }
 
 module "server" {
-    source = "../modules/server"
-    location = var.region
-    image = var.server_image
+    source = "../server"
+    admin_password = random_password.admin.result
+    enroll_secret = random_password.enroll.result
 }
 
 resource "google_compute_instance" "node1" {
-    name         = "lab1-instance"
+    name = "lab1-instance"
     machine_type = "e2-micro"
 
     boot_disk {
@@ -21,12 +34,12 @@ resource "google_compute_instance" "node1" {
     }
 
     network_interface {
-        network = "default"
-        access_config { }
+        subnetwork = module.server.subnet
     }
 
     metadata_startup_script = templatefile("${path.module}/startup.sh", {
-        server_hostname = trimprefix(module.server.server_url, "https://")
-        enroll_secret = module.server.enroll_secret
+        server_hostname = "${module.server.internal_ip}:8080"
+        enroll_secret = random_password.enroll.result
+        server_cert = module.server.certificate
     })
 }

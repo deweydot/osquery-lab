@@ -8,26 +8,43 @@ apt install osquery -y
 
 # configure osquery
 cat <<EOF > /etc/osquery/osquery.flags
-# remote settings
---config_plugin=tls
---distributed_plugin=tls
---tls_server_certs=/etc/ssl/certs/ca-certificates.crt
---enroll_secret_path=/etc/osquery/enroll.secret
-
-# endpoints
---config_tls_endpoint=/config
---enroll_tls_endpoint=/enroll
---distributed_tls_read_endpoint=/distributed_read
---distributed_tls_write_endpoint=/distributed_write
-
-# additional config
+# server
 --tls_hostname=${server_hostname}
+--tls_server_certs=/etc/osquery/cert.pem
+
+# enrollment
+--host_identifier=instance
+--enroll_secret_path=/etc/osquery/secret.txt
+--enroll_tls_endpoint=/api/osquery/enroll
+
+# config
+--config_plugin=tls
+--config_tls_endpoint=/api/v1/osquery/config
+--config_refresh=10
+
+# live query
 --disable_distributed=false
---distributed_interval=5
+--distributed_plugin=tls
+--distributed_interval=10
+--distributed_tls_max_attempts=3
+--distributed_tls_read_endpoint=/api/v1/osquery/distributed/read
+--distributed_tls_write_endpoint=/api/v1/osquery/distributed/write
+
+# logging
+--logger_plugin=tls
+--logger_tls_endpoint=/api/v1/osquery/log
+--logger_tls_period=10
+
+# file carving
+--disable_carver=false
+--carver_start_endpoint=/api/v1/osquery/carve/begin
+--carver_continue_endpoint=/api/v1/osquery/carve/block
+--carver_block_size=8000000
 EOF
 
-# write enroll secret
-echo '${enroll_secret}' > /etc/osquery/enroll.secret
+# write secrets
+echo '${server_cert}' > /etc/osquery/cert.pem
+echo '${enroll_secret}' > /etc/osquery/secret.txt
 
 # start osqueryd
 systemctl enable osqueryd
