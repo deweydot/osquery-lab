@@ -51,7 +51,7 @@ else
     read -r password server <<< $(terraform -chdir=terraform/lab1 output -json | jq -r '[.admin_password.value, .external_ip.value] | join(" ")')
     # Wait for server to pass health check
     echo "Waiting for server to be ready..."
-    until curl -k --fail "https://$server:8080/healthz" 2>&1; do
+    until curl -k --fail "https://$server:8080/healthz" >/dev/null 2>&1; do
         sleep 2
     done
     echo "Server URL: https://$server:8080"
