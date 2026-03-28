@@ -2,7 +2,7 @@
 
 # Install docker compose
 apt-get update
-apt-get install -y docker.io docker-compose-v2
+apt-get install -y docker.io docker-compose-v2 npm
 
 # Create secret files
 mkdir -p /opt/app/secrets
@@ -35,3 +35,12 @@ systemctl enable docker
 systemctl start docker
 cd /opt/app
 docker compose up -d
+
+# Install fleetctl
+npm install -g fleetctl
+fleetctl setup\
+  --email "admin@pdx.edu"\
+  --name "admin"\
+  --password "${admin_password}"\
+  --orgname "PSU"
+fleetctl apply -f secrets/enroll_secret.yml

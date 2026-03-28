@@ -1,11 +1,7 @@
-variable "project_id" {
+variable "enroll_secret" {
     type = string
 }
 
-variable "region" {
-    type = string
-}
-
-variable "zone" {
+variable "admin_password" {
     type = string
 }

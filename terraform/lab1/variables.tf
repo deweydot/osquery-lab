@@ -9,11 +9,3 @@ variable "region" {
 variable "zone" {
     type = string
 }
-
-variable "server_ip" {
-    type = string
-}
-
-variable "enroll_secret" {
-    type = string
-}
