@@ -5,8 +5,11 @@ provider "google" {
 }
 
 resource "random_password" "admin" {
-    length = 32
-    special = false
+    length = 16
+    special = true
+    numeric = true
+    min_special = 1
+    min_numeric = 1
 }
 
 resource "random_password" "enroll" {
@@ -29,7 +32,7 @@ resource "google_compute_instance" "node1" {
             image = "ubuntu-os-cloud/ubuntu-2404-lts-amd64"
         }
     }
-    
+
     network_interface {
         subnetwork = module.server.subnet
     }
@@ -37,5 +40,6 @@ resource "google_compute_instance" "node1" {
     metadata_startup_script = templatefile("${path.module}/startup.sh", {
         server_hostname = "${module.server.internal_ip}:8080"
         enroll_secret = random_password.enroll.result
+        server_cert = module.server.certificate
     })
 }

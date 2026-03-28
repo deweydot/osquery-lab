@@ -35,8 +35,8 @@ services:
       - FLEET_SERVER_CERT=/etc/fleet/fleet.cert
       - FLEET_SERVER_KEY=/etc/fleet/fleet.key
     volumes:
-      - /opt/app/secrets/cert.pem:/etc/fleet/fleet.cert
-      - /opt/app/secrets/key.pem:/etc/fleet/fleet.key
+      - /etc/fleetdm/secrets/cert.pem:/etc/fleet/fleet.cert
+      - /etc/fleetdm/secrets/key.pem:/etc/fleet/fleet.key
     networks:
       - fleet_net
     depends_on:

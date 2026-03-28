@@ -1,46 +1,57 @@
 #!/bin/bash
 
-# Install docker compose
+# Install docker compose and fleetctl
 apt-get update
 apt-get install -y docker.io docker-compose-v2 npm
 
+# Set working directory
+mkdir /etc/fleetdm
+cd /etc/fleetdm
+npm install -g fleetctl
+
 # Create secret files
-mkdir -p /opt/app/secrets
-cat << 'EOF' > /opt/app/secrets/cert.pem
+mkdir secrets
+cat << 'EOF' > secrets/cert.pem
 ${cert_pem}
 EOF
-cat << 'EOF' > /opt/app/secrets/key.pem
+cat << 'EOF' > secrets/key.pem
 ${key_pem}
 EOF
-cat << 'EOF' > /opt/app/secrets/enroll_secret.yml
-apiVersion: v1
-  kind: config
-  spec:
-    secrets:
-      - secret: "${enroll_secret}"
+cat << 'EOF' > secrets/enroll_secret.yml
+policies:
+queries:
+agent_options:
+controls:
+org_settings:
+  secrets:
+    - secret: "${enroll_secret}"
 EOF
 
 # Edit permissions
-chmod 0444 /opt/app/secrets/cert.pem
-chmod 0444 /opt/app/secrets/key.pem
-chmod 0444 /opt/app/secrets/enroll_secret.yml
+chmod 0444 secrets/cert.pem
+chmod 0444 secrets/key.pem
+chmod 0444 secrets/enroll_secret.yml
 
 # Write docker compose file
-cat << 'EOF' > /opt/app/docker-compose.yaml
+cat << 'EOF' > docker-compose.yaml
 ${docker_compose}
 EOF
 
 # Run docker compose
 systemctl enable docker
 systemctl start docker
-cd /opt/app
 docker compose up -d
 
-# Install fleetctl
-npm install -g fleetctl
+# Wait for server to be ready
+until curl -k --fail 'https://localhost:8080/healthz'; do
+  sleep 1
+done
+
+# Setup server
+fleetctl config set --address 'https://localhost:8080' --tls-skip-verify >> log.txt
 fleetctl setup\
-  --email "admin@pdx.edu"\
-  --name "admin"\
-  --password "${admin_password}"\
-  --orgname "PSU"
-fleetctl apply -f secrets/enroll_secret.yml
+  --email 'admin@pdx.edu'\
+  --name 'admin'\
+  --password '${admin_password}'\
+  --org-name 'PSU' >> log.txt
+fleetctl gitops -f secrets/enroll_secret.yml >> log.txt

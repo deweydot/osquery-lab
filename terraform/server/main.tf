@@ -87,7 +87,7 @@ resource "tls_self_signed_cert" "cert" {
 }
 
 resource "google_compute_instance" "instance" {
-    name         = "server-vm"
+    name = "server-vm"
     machine_type = "e2-medium"
     
     tags = ["fleet-server"]
@@ -109,11 +109,11 @@ resource "google_compute_instance" "instance" {
     metadata_startup_script = templatefile("${path.module}/startup.sh", {
         cert_pem = tls_self_signed_cert.cert.cert_pem
         key_pem = tls_private_key.key.private_key_pem
+        admin_password = var.admin_password
         enroll_secret = var.enroll_secret
         docker_compose = templatefile("${path.module}/compose.yaml", {
             mysql_password = random_password.mysql.result
             redis_password = random_password.redis.result
-            admin_password = var.admin_password
         })
     })
 }
