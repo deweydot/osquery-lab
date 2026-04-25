@@ -1,0 +1,8 @@
+mcp:
+  servers:
+    osquery:
+      command: "python"
+      args: ["app.py","stdio"]
+      env:
+        FLEET_URL: "${FLEET_URL}"
+        FLEET_API_KEY: "${FLEET_API_KEY}"
