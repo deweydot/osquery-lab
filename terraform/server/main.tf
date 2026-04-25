@@ -10,12 +10,12 @@ resource "google_compute_subnetwork" "subnet" {
 }
 
 resource "google_compute_firewall" "fleet" {
-    name = "allow-web-server"
+    name = "allow-fleet-server"
     network = google_compute_network.network.name
     
     allow {
         protocol = "tcp"
-        ports = ["8080", "22"]
+        ports = ["8080"]
     }
 
     source_ranges = ["0.0.0.0/0"]
@@ -28,13 +28,13 @@ resource "google_compute_router" "router" {
 }
 
 resource "google_compute_address" "internal" {
-    name = "server-internal"
+    name = "fleet-server-internal"
     subnetwork = google_compute_subnetwork.subnet.id
     address_type = "INTERNAL"
 }
 
 resource "google_compute_address" "external" {
-    name = "server-external"
+    name = "fleet-server-external"
     address_type = "EXTERNAL"
 }
 
@@ -87,7 +87,7 @@ resource "tls_self_signed_cert" "cert" {
 }
 
 resource "google_compute_instance" "instance" {
-    name = "server-vm"
+    name = "fleet-server-vm"
     machine_type = "e2-medium"
     
     tags = ["fleet-server"]
