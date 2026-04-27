@@ -22,7 +22,7 @@ if ! terraform -chdir="terraform/osquery" apply -auto-approve -var-file="$PWD/te
 fi
 
 # get terraform output
-read -r password server <<< $(terraform -chdir=terraform/lab1 output -json | jq -r '[.admin_password.value, .external_ip.value] | join(" ")')
+read -r password server <<< $(terraform -chdir=terraform/osquery output -json | jq -r '[.admin_password.value, .external_ip.value] | join(" ")')
 
 # wait for server to pass health check
 echo "Waiting for server to be ready..."
