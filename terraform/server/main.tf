@@ -114,6 +114,9 @@ resource "google_compute_instance" "instance" {
         docker_compose = templatefile("${path.module}/compose.yaml", {
             mysql_password = random_password.mysql.result
             redis_password = random_password.redis.result
+            fleet_version = var.fleet_version
+            mysql_version = var.mysql_version
+            redis_version = var.redis_version
         })
     })
 }

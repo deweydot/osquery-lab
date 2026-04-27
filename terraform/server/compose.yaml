@@ -1,6 +1,6 @@
 services:
   mysql:
-    image: mysql:8.0-debian
+    image: mysql:${mysql_version}
     environment:
       - MYSQL_RANDOM_ROOT_PASSWORD=yes
       - MYSQL_DATABASE=fleet
@@ -16,13 +16,13 @@ services:
       start_period: 10s
 
   redis:
-    image: redis:7.0-alpine
+    image: redis:${redis_version}
     command: ["redis-server", "--requirepass", "${redis_password}"]
     networks:
       - fleet_net
   
   fleet:
-    image: fleetdm/fleet:latest
+    image: fleetdm/fleet:${fleet_version}
     entrypoint: ["/bin/sh", "-c"]
     command: ["fleet prepare db --no-prompt && fleet serve"]
     ports:
