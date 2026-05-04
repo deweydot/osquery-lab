@@ -18,14 +18,10 @@ Next, in your web browser visit the URL (e.g. `https://10.20.30.40:8080`). You s
 
 * **Go to Hosts and take a screenshot of the node VM**
 
-## osquery Lab (cont.)
-
-## osquery Lab (cont.)
 ### Run queries manually
 Before using LLMs to interact with osquery, start by running some queries manually to familiarize yourself. Navigate to Reports and click "Add report". From here, you can craft your osquery statement and then execute it with "Live report" > "All hosts" > "Run".
 
 Run the following commands and take a screenshot of each result.
-
 * **Return processes that are deleted from disk**
     ```
     SELECT pid, name, path FROM processes WHERE on_disk = 0;
@@ -38,66 +34,24 @@ Run the following commands and take a screenshot of each result.
     ```
     SELECT u.username, u.directory, u.shell, s.last_change FROM shadow s JOIN users u ON s.username = u.username WHERE s.last_change < ((strftime('%s', 'now') / 86400) - 365);
 
----
+## osquery Lab (cont.)
+### Using an LLM agent
+Now, you will use the provided agent to perform the same queries using natural language. The agent uses an MCP server (`app.py`) to communicate with FleetDM's REST API to run queries for you. The agent requires the server URL and an API key. The API key can be retrived from `https://<server-ip>:8080/account` > "Get API token".
 
-## Part 3: Agentic osquery via MCP
-
-Now, you will use the provided Python agent to perform the same IT operations using natural language. The agent will communicate with an MCP server (`app.py`), which abstracts the FleetDM REST API into tools the AI can use.
-
-### 1. Agent Environment Setup
-Open a new terminal window or tab and navigate to the `agent` directory. Install the required Python dependencies:
+To set up the agent run the following commands. You can run the agent from any machine.
 ```
-pip install -r requirements.txt
-```
-*(This will install necessary packages like `fast-agent-mcp` and `fastmcp`.)*
-
-### 2. Download the osquery Schema
-The MCP server requires the osquery schema to understand the database structure. Download it directly using `wget`:
-```
+cd agent
+uv init --bare
+uv add -r requirements.txt
 wget -O osquery.json https://raw.githubusercontent.com/osquery/osquery-site/main/src/data/osquery_schema_versions/5.21.0.json
+export FLEET_URL='<your-server-ip>:8080'
+export FLEET_API_KEY='...'
 ```
-**
+Do not include `https://` in FLEET_URL.
 
-### 3. Generate a Fleet API Key
-1. Go back to your FleetDM web interface.
-2. Click on your profile icon in the top right and select **My account**.
-3. Under **API tokens**, generate a new API key. Copy this key to your clipboard.
+Then, run the agent with `uv run client.py`. Using the LLM agent, perform the same queries and take a screenshot of each result including the prompt used.
+* **Return processes that are deleted from disk**
+* **Return ports that are in the listening state**
+* **Return users with a password that has not been changed in over 1 year**
 
-### 4. Configure Environment Variables
-The MCP server relies on environment variables to authenticate with your Fleet server. Export them in your terminal (replace the placeholders with your actual Server URL and API Key):
-```
-export FLEET_URL="<YOUR_SERVER_IP>:8080"
-export FLEET_API_KEY="<YOUR_COPIED_API_KEY>"
-```
-
-### 5. Run the Agent
-Start the interactive CLI agent:
-```bash
-python client.py
-```
-**
-
-Once the agent is running, ask it to perform the same four tasks using natural language prompts:
-1. *"Find any processes that are deleted from disk."*
-2. *"List all ports that are currently in a listening state."*
-3. *"Check if there are any users whose passwords haven't been changed in over a year."*
-4. *"Identify any users that have root privileges but are not the 'root' user."*
-
-**Take screenshots** of the conversational output and the agent's successful retrievals to include in your lab notebook.
-
----
-
-## Part 4: Cleanup & Teardown
-
-When you have finished the lab and collected all your screenshots, you must destroy the infrastructure to prevent unwanted GCP charges.
-
-1. Navigate back to the root `osquery-lab` directory.
-2. Run the destroy script:
-   ```bash
-   ./destroy.sh
-   ```
-   **
-3. Wait for the script to output `Level destroyed.`.
-
----
-**Submission Reminder:** Ensure your lab notebook contains 8 screenshots total (4 from the FleetDM manual SQL panel, and 4 from the interactive MCP agent terminal) along with any required analysis requested by your instructor.
+When you are done, run the `destroy.sh` script to clean up the created VMs.
