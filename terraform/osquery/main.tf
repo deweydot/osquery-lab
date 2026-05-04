@@ -41,5 +41,6 @@ resource "google_compute_instance" "node" {
         server_hostname = "${module.server.internal_ip}:8080"
         enroll_secret = random_password.enroll.result
         server_cert = module.server.certificate
+        osquery_version = var.osquery_version
     })
 }

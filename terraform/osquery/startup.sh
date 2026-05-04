@@ -4,7 +4,7 @@
 wget -O /etc/apt/keyrings/osquery.asc https://pkg.osquery.io/deb/pubkey.gpg
 echo 'deb [arch=amd64 signed-by=/etc/apt/keyrings/osquery.asc] https://pkg.osquery.io/deb deb main' > /etc/apt/sources.list.d/osquery.list
 apt update
-apt install osquery -y
+apt install osquery=${osquery_version} -y
 
 # configure osquery
 cat <<EOF > /etc/osquery/osquery.flags
