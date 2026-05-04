@@ -8,7 +8,7 @@ variable "admin_password" {
 
 variable "fleet_version" {
     type = string
-    default = "melpike-patch-6"
+    default = "v4.84.2"
 }
 
 variable "mysql_version" {
