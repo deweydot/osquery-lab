@@ -58,8 +58,3 @@ nc -lk 6667 &
 useradd -m alice
 echo "alice:correcthorsebatterystaple" | chpasswd
 chage -d 1999-12-31 alice
-mkdir -p /home/alice/.ssh
-chmod 700 /home/alice/.ssh
-echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQXYZ eve@example.com" > /home/alice/.ssh/authorized_keys
-chmod 600 /home/alice/.ssh/authorized_keys
-chown -R alice:alice /home/alice/.ssh
