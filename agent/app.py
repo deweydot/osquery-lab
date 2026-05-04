@@ -1,6 +1,6 @@
 """FleetDM MCP server got running osquery commands on a Fleet.
 
-Tested on Fleet version 4.79.0 and osquery version 5.21.0.
+Tested on Fleet version 4.84.2 and osquery version 5.21.0.
 See https://fleetdm.com/docs/rest-api/rest-api for REST API.
 See https://osquery.io/schema/5.21.0/ for osquery schema.
 
