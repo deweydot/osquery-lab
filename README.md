@@ -28,11 +28,12 @@ Run the following commands and take a screenshot of each result.
     ```
 * **Return ports that are in the listening state**
     ```
-    SELECT p.name, p.path, p.cmdline, lp.port FROM listening_ports lp JOIN processes p ON lp.pid = p.pid WHERE lp.port != 0;
+    SELECT p.name, p.path, p.cmdline, l.port FROM listening_ports l JOIN processes p ON l.pid = p.pid WHERE l.port != 0;
     ```
 * **Return users with a password that has not been changed in over 1 year**
     ```
-    SELECT u.username, u.directory, u.shell, s.last_change FROM shadow s JOIN users u ON s.username = u.username WHERE s.last_change < ((strftime('%s', 'now') / 86400) - 365);
+    SELECT s.username, u.uid, s.last_change, u.directory FROM shadow s JOIN users u ON s.username = u.username WHERE s.last_change < strftime('%s','now')/86400 - 365  
+    ```
 
 ## osquery Lab (cont.)
 ### Using an LLM agent
@@ -43,11 +44,13 @@ To set up the agent run the following commands. You can run the agent from any m
 cd agent
 uv init --bare
 uv add -r requirements.txt
-wget -O osquery.json https://raw.githubusercontent.com/osquery/osquery-site/main/src/data/osquery_schema_versions/5.21.0.json
 export FLEET_URL='<your-server-ip>:8080'
 export FLEET_API_KEY='...'
+export OPENAI_API_KEY='...'
 ```
 Do not include `https://` in FLEET_URL.
+
+Also, ensure your chosen model
 
 Then, run the agent with `uv run client.py`. Using the LLM agent, perform the same queries and take a screenshot of each result including the prompt used.
 * **Return processes that are deleted from disk**
