@@ -3,7 +3,11 @@ from fast_agent.core.fastagent import FastAgent
 
 fast = FastAgent('osquery')
 
-system_prompt = 'Use the provided MCP server to assist the user perform IT tasks.'
+system_prompt = (
+    'Use the provided MCP server to assist the user in collecting OS information. '
+    'If the user does not specify which node to target for a query, call `list_hosts` and '
+    'run the query on the first node listed.'
+)
 
 @fast.agent(
     instruction = system_prompt,
